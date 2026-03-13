@@ -8,6 +8,7 @@
 |---|---|
 | `scripts/` | 실행 가능한 유틸리티 스크립트 (서버 관리, 파일 정리 등) |
 | `snippets/` | 코드 스니펫, 템플릿 (docker-compose, boilerplate 등) |
+| `cheatsheets/` | 자주 쓰는 명령어/문법 모음 (git, docker, tmux 등) |
 | `til/` | Today I Learned — 빠른 메모, 날것의 기록 |
 
 ## 사용법
