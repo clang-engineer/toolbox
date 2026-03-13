@@ -60,3 +60,4 @@
 |------|------|
 | [ascii.md](ascii.md) | ASCII 코드 테이블 |
 | [html-entity.md](html-entity.md) | HTML 엔티티 참조 |
+| [linux-directory.md](linux-directory.md) | Linux 디렉터리 구조 |
