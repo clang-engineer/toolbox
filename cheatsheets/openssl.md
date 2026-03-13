@@ -1,37 +1,72 @@
+# OpenSSL Cheatsheet
 
 ## 인증서 발행 절차
+
 1. 개인키 생성
 2. CSR(Certificate Signing Request) 생성
-3. CSR을 CA에 전송  
+3. CSR을 CA에 전송
 4. CA에서 인증서 발급
 5. 인증서 설치
 
-## OpenSSL을 사용한 자체 인증서 발급
-1. 개인키 생성
-genrsa 또는 genpkey 명령어를 사용하여 RSA 알고리즘을 사용한 개인키를 생성한다. (*genpkey 명령어 권장)
+## 자체 서명 인증서 발급
 
-```bash
-openssl genrsa -out private.key 2048 # 2048은 키의 비트 수
-```
-```bash
-# openssl genrsa -out private.key 2048 (*genpkey 명령어가 더 권장됨, genrsa는 암호화 방식 RSA만 지원)
-# -aes256 : 개인키 암호화 방식 지정, 지정하지 않으면 암호화되지 않은 개인키 생성
-openssl genpkey -algorithm RSA -out private.key -aes256 
+### 1. 개인키 생성
+
+```sh
+# genpkey 권장 (다양한 알고리즘 지원)
+openssl genpkey -algorithm RSA -out private.key -aes256
+
+# genrsa (RSA만 지원, 레거시)
+openssl genrsa -out private.key 2048
 ```
 
-2. CSR(Certificate Signing Request) 생성    
-CSR은 인증서 발급 요청서로, 인증서에 포함될 정보를 담고 있다.
-```bash
-# openssl req -new -key private.key -out request.csr -subj "/C=KR/ST=Seoul/L=Gangnam/O=MyCompany/OU=Dev/CN=example.com" 로 옵션 추가 가능
+### 2. CSR 생성
+
+```sh
 openssl req -new -key private.key -out request.csr
+
+# 한 줄로 subject 지정
+openssl req -new -key private.key -out request.csr \
+  -subj "/C=KR/ST=Seoul/L=Gangnam/O=MyCompany/OU=Dev/CN=example.com"
 ```
 
-3. 인증서 생성
-```bash
+### 3. 인증서 생성
+
+```sh
 openssl x509 -req -days 365 -in request.csr -signkey private.key -out certificate.crt
 ```
 
-4. 인증서 확인
-```bash
-openssl x509 -in certificate.crt -text -noout
+### 한 줄로 자체 서명 인증서 생성 (키 + 인증서)
+
+```sh
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 365 -nodes \
+  -subj "/CN=localhost"
+```
+
+## 인증서 확인
+
+```sh
+openssl x509 -in certificate.crt -text -noout      # 인증서 상세 정보
+openssl x509 -in certificate.crt -dates -noout      # 유효 기간만 확인
+openssl verify -CAfile ca.crt certificate.crt        # CA로 인증서 검증
+```
+
+## 원격 서버 인증서 확인
+
+```sh
+openssl s_client -connect example.com:443 </dev/null 2>/dev/null | openssl x509 -text -noout
+openssl s_client -connect example.com:443 </dev/null 2>/dev/null | openssl x509 -dates -noout
+```
+
+## 포맷 변환
+
+```sh
+# PEM → DER
+openssl x509 -in cert.pem -outform DER -out cert.der
+
+# DER → PEM
+openssl x509 -in cert.der -inform DER -outform PEM -out cert.pem
+
+# PEM → PKCS12
+openssl pkcs12 -export -out cert.p12 -inkey key.pem -in cert.pem
 ```

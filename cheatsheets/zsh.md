@@ -1,5 +1,6 @@
+# Zsh Cheatsheet
 
-## ⌨️ 커서 이동
+## 커서 이동
 
 | 단축키 | 설명 |
 |--------|------|
@@ -9,7 +10,7 @@
 | `Alt+B` | 이전 단어로 이동 |
 | `Ctrl+XX` | 줄 앞과 현재 위치 토글 |
 
-## ✂️ 편집
+## 편집
 
 | 단축키 | 설명 |
 |--------|------|
@@ -22,7 +23,7 @@
 | `Alt+T` | 단어 순서 바꾸기 |
 | `Ctrl+T` | 문자 순서 바꾸기 |
 
-## 🔍 히스토리 & 검색
+## 히스토리 & 검색
 
 | 단축키 | 설명 |
 |--------|------|
@@ -38,7 +39,7 @@
 | `^old^new` | 마지막 명령어의 old를 new로 교체 |
 | `Alt+.` | 이전 명령어의 마지막 인자 (반복 가능) |
 
-## 🎛️ 프로세스 제어
+## 프로세스 제어
 
 | 단축키 | 설명 |
 |--------|------|
@@ -50,7 +51,7 @@
 | `bg` | 일시정지된 프로세스를 백그라운드로 |
 | `jobs` | 백그라운드 프로세스 목록 |
 
-## 📜 자동완성 & 확장
+## 자동완성 & 확장
 
 | 단축키 | 설명 |
 |--------|------|
@@ -60,7 +61,7 @@
 | `Alt+/` | 경로 확장 |
 | `**` + `Tab` | 재귀 디렉터리 자동완성 (예: `ls **/file.txt`) |
 
-## 🌟 Zsh 전용 기능
+## Zsh 전용 기능
 
 ### Glob 패턴
 
@@ -82,7 +83,7 @@
 | `pushd <dir>` | 디렉터리 스택에 추가하고 이동 |
 | `popd` | 스택에서 꺼내고 이동 |
 
-## 🔧 자주 쓰는 명령어
+## 자주 쓰는 명령어
 
 ### 파일 & 디렉터리
 
@@ -141,7 +142,7 @@
 | `netstat -tuln` | 포트 리스닝 확인 |
 | `lsof -i :<port>` | 포트 사용 프로세스 확인 |
 
-## 💡 유용한 alias 예시
+## 유용한 alias 예시
 
 ```bash
 # ~/.zshrc에 추가
@@ -175,7 +176,7 @@ alias zshrc='vim ~/.zshrc'
 alias reload='source ~/.zshrc'
 ```
 
-## 🎨 Oh My Zsh 플러그인 추천
+## Oh My Zsh 플러그인 추천
 
 ```bash
 # ~/.zshrc
@@ -200,7 +201,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-m
 git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
 ```
 
-## 🔑 환경변수
+## 환경변수
 
 | 명령어 | 설명 |
 |--------|------|
@@ -210,7 +211,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 | `export PATH=$PATH:/new/path` | PATH에 경로 추가 |
 | `unset VAR` | 환경변수 제거 |
 
-## 💾 입출력 리다이렉션
+## 입출력 리다이렉션
 
 | 명령어 | 설명 |
 |--------|------|
@@ -222,7 +223,7 @@ git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:
 | `cmd1 \| cmd2` | cmd1 출력을 cmd2 입력으로 |
 | `cmd > /dev/null` | 출력 버리기 |
 
-## 🧠 자주 쓰는 조합
+## 자주 쓰는 조합
 
 ```bash
 # 파일 내용 빠르게 확인

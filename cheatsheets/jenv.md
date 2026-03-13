@@ -1,52 +1,49 @@
+# jEnv Cheatsheet
 
-java 8, 11, 17 버전을 설치하고 jenv를 사용하여 자바 버전을 관리하는 방법
+Java 버전 관리 도구 (macOS).
 
-## jenv 설치
-```bash
+## 설치
+
+```sh
 brew install jenv
 ```
 
-## jenv 설정
-```bash
-echo 'export PATH="$HOME/.jenv/bin:$PATH"' >> ~/.zshrc  # jenv 경로 추가
-echo 'eval "$(jenv init -)"' >> ~/.zshrc  # jenv 초기화 스크립트를 ~/.zshrc에 추가
-source ~/.zshrc
+## 셸 설정 (~/.zshrc)
+
+```sh
+export PATH="$HOME/.jenv/bin:$PATH"
+eval "$(jenv init -)"
 ```
 
-## java 설치
-```bash
-brew install openjdk@8 # java 8
-brew install openjdk@11 # java 11
-brew install openjdk@17 # java 17
-```
+## Java 설치 (Homebrew)
 
-## 심볼릭 링크 추가
-macOS에서 java 버전 관리 시 심볼릭 링크를 추가해야 한다. 
-```bash
-sudo ln -sfn /opt/homebrew/Cellar/openjdk@8/*/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-8.jdk
-sudo ln -sfn /opt/homebrew/Cellar/openjdk@11/*/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-11.jdk
+```sh
+brew install openjdk@17
+brew install openjdk@21
+
+# 심볼릭 링크 추가 (macOS 필수)
 sudo ln -sfn /opt/homebrew/Cellar/openjdk@17/*/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
+sudo ln -sfn /opt/homebrew/Cellar/openjdk@21/*/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-21.jdk
 
 # 심볼릭 링크 확인
-/usr/libexec/java_home -v 8
-/usr/libexec/java_home -v 11
-/usr/libexec/java_home -v 17
+/usr/libexec/java_home -V
 ```
 
-## jenv에 java 버전 추가
-```bash
-jenv add /Library/Java/JavaVirtualMachines/openjdk-8.jdk/Contents/Home
-jenv add /Library/Java/JavaVirtualMachines/openjdk-11.jdk/Contents/Home
+## jEnv에 버전 등록
+
+```sh
 jenv add /Library/Java/JavaVirtualMachines/openjdk-17.jdk/Contents/Home
+jenv add /Library/Java/JavaVirtualMachines/openjdk-21.jdk/Contents/Home
 ```
 
-## jenv 명령어
-```bash
-jenv version # 현재 사용중인 java 버전 확인
-jenv versions # 설치된 java 버전 확인
-jenv global 17 # 전역 java 버전 설정
-jenv local 11 # 현재 디렉토리 java 버전 설정
-jenv shell 8 # 현재 쉘 java 버전 설정
-jenv exec java -version # jenv를 사용하여 java 버전 확인
-jenv doctor # jenv 설정 확인
+## 명령어
+
+```sh
+jenv versions               # 등록된 버전 목록
+jenv version                # 현재 사용 중인 버전
+jenv global 21              # 전역 버전 설정
+jenv local 17               # 현재 디렉터리 버전 설정 (.java-version 생성)
+jenv shell 17               # 현재 셸 세션 버전 설정
+jenv doctor                 # 설정 진단
+jenv enable-plugin export   # JAVA_HOME 자동 설정 플러그인
 ```

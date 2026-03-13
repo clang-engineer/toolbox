@@ -1,172 +1,125 @@
-
+# GDB Cheatsheet
 
 ## 설치
+
 ```sh
-brew install gdb # mac
-sudo apt-get install gdb # linux
-```
-```sh
-gcc –g test.c –o test
-gdb test
+brew install gdb        # macOS
+sudo apt install gdb    # Ubuntu/Debian
 ```
 
 ## 사전 준비
-- 컴파일시 -g 옵션 추가 
+
+컴파일 시 `-g` 옵션으로 디버그 정보 포함:
+
 ```sh
-g++ -g test.c -o test	# 컴파일
-gdb test	# 실행
+gcc -g test.c -o test
+g++ -g main.cpp -o main
 ```
 
-## GDB 실행
+## 실행
+
 ```sh
 gdb <프로그램명>
+gdb --args <프로그램명> <arg1> <arg2>    # 인자 전달
 ```
 
-## 중단점 설정/확인/해제
+## 중단점 (Breakpoint)
 
-### break : 중단점 설정
+### 설정
+
 ```sh
 break <함수이름>
 break <라인번호>
 break <파일이름:라인번호>
 break <파일이름:함수이름>
-break <...> if <condition>	// 조건에 맞는 경우 중단점 설정
+break <...> if <condition>    # 조건부 중단점
 ```
 
-### info break : 중단점 확인
-```sh
-info break
-info b
-i b
-```
+### 확인 / 삭제
 
-### clear : 특정 중단점 삭제
 ```sh
-clear <함수이름>
+info break                   # 중단점 목록 (약어: i b)
+
+clear <함수이름>              # 특정 중단점 삭제
 clear <라인번호>
-clear <파일이름:라인번호>
-clear <파일이름:함수이름>
+delete                       # 모든 중단점 삭제
+delete <번호>                 # 번호로 삭제
 ```
 
-### delete : 모든 중단점 삭제
-```sh
-delete	// 설정된 모든 중단점 삭제
-delete <breakpoint 번호>	// 번호에 해당하는 중단점 삭제
-delete <breakpoint 번호> <breakpoint 번호>	// 번호에 해당하는 모든\ 중단점 삭제
-```
-
-### disable / enable : 중단점 활성화/비활성화
+### 활성화 / 비활성화
 
 ```sh
-# 중단점 활성화
-enable 
-enable <breakpoint 번호>
-enable <breakpoint 번호> <breakpoint 번호>
-# 중단점 비활성화
-disable
-disable <breakpoint 번호>
-disable <breakpoint 번호> <breakpoint 번호>
+enable <번호>
+disable <번호>
 ```
 
+## 실행 제어
 
-## 프로세스 실행
+| 명령어 | 설명 |
+|--------|------|
+| `run` (`r`) | 프로세스 실행/재실행 |
+| `continue` (`c`) | 다음 중단점까지 재개 |
+| `next` (`n`) | 한 줄 실행 (함수 내부 진입 X) |
+| `step` (`s`) | 한 줄 실행 (함수 내부 진입 O) |
+| `finish` | 현재 함수 완료 후 리턴값 출력 |
+| `return` | 현재 함수를 실행하지 않고 빠져나감 |
+| `return <값>` | 지정한 값을 리턴하며 빠져나감 |
 
-### run : 프로세스 실행 또는 재실행
+## Call Stack
 
 ```sh
-run
+backtrace              # 콜 스택 확인 (약어: bt)
+bt full                # 지역변수 포함 출력
+bt <N>                 # 상위 N개만 출력
+frame <N>              # N번 프레임으로 이동
+up / down              # 프레임 이동
 ```
 
-### continue : 다음 중단점까지 프로세스 재채
-```sh
-continue
-continue n
-```
+## 값 출력 / 변경
 
-### next : 실행 중인 프로세스를 한 줄 실행(함수 실행 시 내부로 진입x)
-
-```sh
-next
-next n
-```
-
-### step : 실행 중인 프로세스를 한 줄 실행(함수 실행 시 내부로 진입o)
-```sh
-step
-step n
-```
-
-### finish : 현재 함수를 수행하고 빠져나간 후 리턴 값 출력
-```sh
-finish
-```
-
-## Call Stack 확인
-
-### backtrace
+### print
 
 ```sh
-backtrace
-bt
-bt N
-bt -N
-bt full
+print <변수>            # 변수 값 출력 (약어: p)
+p *<포인터>             # 포인터 역참조
+p arr[n]               # 배열 요소
+p/x <변수>             # 16진수 출력
+p -pretty *<구조체>    # 구조체 보기 좋게 출력
+set var <변수>=<값>     # 변수 값 변경
 ```
 
-## 값 출력/변경
-
-### print : 변수/주소 등을 출력
+### display
 
 ```sh
-print <val>
-p <val>
-p <func:val>
-p *<ptr>
-p <addr>
-p arr[n]
-p -pretty *<구조체>
-p/x <val>
+display <변수>          # 매 step/next마다 자동 출력
+info display           # display 목록
+undisplay <번호>        # display 해제
 ```
 
-### display : 매 실행(step, next, continue 등) 마다 출력
+## 소스 코드
 
 ```sh
-display expr
-dsiplay/fmt expr 
-
-info dis
-info display
-
-enable display
-en dis
-en dis <번호>< 번호>
-
-disable display
-dis dis
-dis dis <번호><번호>
+list                   # 현재 위치 소스 출력 (약어: l)
+list <라인번호>
+list <함수이름>
+list <시작>,<끝>
+set listsize <N>       # 출력 라인 수 설정
 ```
 
-## 기타
+## 메모리 / 레지스터
 
-### return : 현재 함수를 수행하지 않고 빠져나감
 ```sh
-return
-return -1
+x/<N><fmt><size> <주소>   # 메모리 검사 (예: x/16xb $rsp)
+info registers            # 레지스터 확인 (약어: i r)
+info locals               # 지역변수 확인
+info args                 # 함수 인자 확인
 ```
 
-### list : 소스 파일을 출력
+## 워치포인트
+
 ```sh
-list
-list 100
-list function
-list -
-list start,end
-
-set listsize count
-set listsize unlimited
+watch <변수>              # 변수 값 변경 시 중단
+rwatch <변수>             # 변수 읽기 시 중단
+awatch <변수>             # 읽기/쓰기 시 중단
+info watchpoints          # 워치포인트 목록
 ```
-
-## Reference
-
-> https://jangpd007.tistory.com/54
-> https://dining-developer.tistory.com/13

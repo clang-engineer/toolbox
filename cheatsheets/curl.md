@@ -1,65 +1,131 @@
+# curl Cheatsheet
+
+## 설치
+
+```sh
+brew install curl       # macOS
+sudo apt install curl   # Ubuntu, Debian
+sudo yum install curl   # CentOS, Fedora
+```
+
+## 기본 사용법
 
 ```sh
 curl --help
 curl --manual
 ```
 
-## 설치
+## 주요 옵션
+
+### -v (Verbose)
+
+상세한 요청/응답 로그 표시:
+
 ```sh
-brew install curl  // MacOS
-sudo apt install curl  // Ubuntu, Debian
-sudo yum install curl  // CentOS, Fedora
+curl -v https://example.com
 ```
 
+### -H (Header)
 
-## 사용법
-1. -v 옵션
--v(Verbose) 옵션을 줄 경우 상세한 로그도 함께 표시됨
+요청 헤더 지정:
+
 ```sh
-curl -v https://google.com
+curl -H "Content-Type: application/json" -H "Authorization: Bearer <token>" https://example.com
 ```
 
-2. -H 옵션
--H 옵션을 이용해 헤더를 정의
+### -d (Data)
+
+POST 요청으로 데이터 전송:
+
 ```sh
-curl -H "Cotent-Type: test/xml", -H "Authorization : Bearer token" https://google.com
+curl -d 'key=value' -d 'foo=bar' https://example.com
+curl -H 'Content-Type: application/json' -d '{"foo": "bar"}' https://example.com
 ```
 
-3. -d 옵션
-POST로 폼 데이터를 함께 요청하려면 -d 옵션을 사용
+### -i (Include)
+
+응답 헤더를 함께 출력:
+
 ```sh
-curl -d 'key=value' -d "foo=bar" https://google.com
-curl -H 'Content-Type: application/json' -d '{"foo": "bar"}' https://google.com # json 형식으로 전송
+curl -i https://example.com
 ```
 
-4. -i 옵션
-응답 헤더를 함께 출력
+### -X (Method)
+
+요청 메소드 지정:
+
 ```sh
-curl -i https://google.com
+curl -X PUT -d '{"key": "value"}' -H 'Content-Type: application/json' https://example.com
+curl -X DELETE https://example.com/resource/1
+curl -X PATCH -d '{"name": "new"}' -H 'Content-Type: application/json' https://example.com
 ```
 
-5. -F 또는 --form 옵션
-```sh
-curl -F 'file=@/foo/bar/path' -F 'key=value' https://google.com
-```
-- 요청이 multipart/form-data형식으로 날아감
-- @를 통해서 파일을 구분
+### -F (Form)
 
-5. -X옵션
-요청메소드의 형식을 지정
+multipart/form-data 형식 전송 (`@`로 파일 지정):
+
 ```sh
-curl -X PUT -d 'foo=bar' https://google.com
+curl -F 'file=@/path/to/file' -F 'key=value' https://example.com
 ```
 
-6. 파일 다운로드 받는 방법
+### -o / -O (Output)
+
+파일 다운로드:
+
 ```sh
-curl https://www.google.com > test.html  # 방법1. 응답을 리다이렉응
-curl https://www.google.com/image.jpg --output doewnloaded_image.jpg # 방법2. 별도의 --output 옵션 지정
+curl https://example.com > output.html           # 리다이렉션
+curl -o output.html https://example.com           # 파일명 지정
+curl -O https://example.com/image.jpg             # 원본 파일명 유지
+curl -L -O https://example.com/file.tar.gz        # 리다이렉트 따라가며 다운로드
 ```
 
-7. -k(--insecure) 옵션
-검증을 하지 않는 옵션인 -k (사설 인증서 붙인 서버 확인할 때 사용)
+### -k (Insecure)
+
+SSL 인증서 검증 무시 (사설 인증서 서버 테스트 시):
+
 ```sh
-curl -k https://www.test.com
-curl --insecure https://www.google.com
+curl -k https://self-signed.example.com
+```
+
+### -L (Follow Redirects)
+
+HTTP 리다이렉트 자동 따라감:
+
+```sh
+curl -L https://example.com
+```
+
+### -s (Silent) / -S (Show Error)
+
+진행 표시 숨기기:
+
+```sh
+curl -s https://example.com                       # 조용한 모드
+curl -sS https://example.com                      # 조용하지만 에러는 표시
+curl -s https://api.example.com/data | jq .        # JSON 파이프라인에 유용
+```
+
+### -w (Write-out)
+
+응답 정보 출력:
+
+```sh
+curl -s -o /dev/null -w "%{http_code}" https://example.com           # HTTP 상태 코드만
+curl -s -o /dev/null -w "time_total: %{time_total}s\n" https://example.com  # 응답 시간 측정
+```
+
+## 자주 쓰는 패턴
+
+```sh
+# REST API 호출
+curl -s https://api.example.com/users | jq .
+
+# Bearer 토큰 인증
+curl -H "Authorization: Bearer $TOKEN" https://api.example.com/me
+
+# 파일 업로드
+curl -F "file=@report.pdf" https://example.com/upload
+
+# 응답 시간 측정
+curl -o /dev/null -s -w "DNS: %{time_namelookup}s\nConnect: %{time_connect}s\nTotal: %{time_total}s\n" https://example.com
 ```
