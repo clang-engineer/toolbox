@@ -59,6 +59,85 @@ curl -X GET "http://HOST:9200/INDEX/_search?pretty" \
 curl -X GET "http://HOST:9200/INDEX/_search?size=5&pretty"
 ```
 
+## 검색 쿼리
+
+### match (부분 매칭)
+
+단어 단위로 분석 후 매칭. 순서 무관, OR 조건.
+
+```bash
+curl -X GET "http://HOST:9200/INDEX/_search?pretty" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": {
+      "match": {
+        "exrs_cnte": "mild as"
+      }
+    }
+  }'
+
+# _count와 조합
+curl -X GET "http://HOST:9200/INDEX/_count" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": {
+      "match": {
+        "exrs_cnte": "mild as"
+      }
+    }
+  }'
+```
+
+### match_phrase (정확한 구문 매칭)
+
+단어 순서까지 일치해야 매칭.
+
+```bash
+curl -X GET "http://HOST:9200/INDEX/_search?pretty" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": {
+      "match_phrase": {
+        "exrs_cnte": "Mild As"
+      }
+    }
+  }'
+```
+
+### match vs match_phrase 비교
+
+| 쿼리 | `"mild as"` 입력 시 매칭 | 용도 |
+|------|--------------------------|------|
+| `match` | "mild" 또는 "as" 포함하면 매칭 (OR) | 넓은 검색 |
+| `match` + `"operator": "and"` | "mild"과 "as" 모두 포함 (순서 무관) | 교집합 검색 |
+| `match_phrase` | "mild as" 구문 그대로 매칭 (순서 일치) | 정확한 문구 검색 |
+
+### bool 쿼리 (복합 조건)
+
+```bash
+curl -X GET "http://HOST:9200/INDEX/_search?pretty" \
+  -H 'Content-Type: application/json' \
+  -d '{
+    "query": {
+      "bool": {
+        "must": [
+          { "match_phrase": { "exrs_cnte": "Mild As" } }
+        ],
+        "filter": [
+          { "range": { "lsh_dtm": { "gte": "2024-01-01", "lte": "2024-12-31" } } }
+        ]
+      }
+    }
+  }'
+```
+
+| bool 절 | 설명 |
+|---------|------|
+| `must` | AND 조건 (스코어 반영) |
+| `should` | OR 조건 (스코어 반영) |
+| `must_not` | NOT 조건 |
+| `filter` | AND 조건 (스코어 무시, 캐싱됨 → 빠름) |
+
 ## Bulk 적재
 
 ```bash
