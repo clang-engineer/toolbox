@@ -67,8 +67,11 @@ brew install --cask nikitabobko/tap/aerospace
 ```bash
 open -a AeroSpace              # 앱 실행
 aerospace list-workspaces      # 워크스페이스 목록
-aerospace list-windows         # 현재 창 목록
+aerospace list-windows --all   # 모든 창 목록
+aerospace list-apps            # 열린 앱 + bundle ID 확인
 aerospace reload-config        # 설정 리로드
+aerospace move-node-to-workspace 2  # 현재 창을 workspace 2로 이동
+aerospace workspace 3          # workspace 3으로 전환
 ```
 
 ## yabai vs Aerospace 비교
