@@ -41,34 +41,7 @@ volatile  → 변수를 어디서 읽냐 (메인 메모리 vs CPU 캐시)
 - `volatile` 없으면: 스레드 A가 값을 바꿔도, 스레드 B는 자기 CPU 캐시(옛날 값)를 계속 봄
 - `volatile` 있으면: CPU 캐시 무시, 항상 메인 메모리(힙)에서 직접 읽음 → 최신 값 보장
 
-## volatile 사용 예시
-
-```java
-// 1. 일반 클래스 - 스레드 간 플래그 공유
-public class Worker implements Runnable {
-    private volatile boolean running = true;
-
-    public void run() {
-        while (running) { // 다른 스레드가 stop() 호출하면 즉시 반영
-            doWork();
-        }
-    }
-
-    public void stop() {
-        running = false;
-    }
-}
-
-// 2. Spring 싱글톤 Bean - 인메모리 캐싱
-@Service
-public class DashboardService {
-    private static final long CACHE_TTL_MS = 60 * 60 * 1000L; // 상수: static final
-    private volatile DashboardResponse cachedResponse;          // 캐시: volatile
-    private volatile long cacheTimestamp;
-}
-```
-
-**핵심: `volatile`은 Spring Bean 전용이 아니라, 여러 스레드가 하나의 변수를 읽고 쓰는 모든 상황에서 필요하다.**
+**싱글톤과의 관계:** 싱글톤 Bean은 힙에 인스턴스 1개 → 모든 스레드가 같은 변수를 공유 → CPU 캐시 불일치 문제 발생 → `volatile` 필요. 매 요청마다 새 인스턴스를 만드는 구조였다면 변수를 공유하지 않으니 `volatile`이 필요 없다.
 
 ## 싱글톤인데 상수에 static을 쓰는 이유
 
@@ -77,46 +50,45 @@ public class DashboardService {
 2. **안전장치** - 스코프가 바뀌어도(프로토타입 등) 안전하게 동작
 3. **관례** - Logger, 상수는 `private static final`이 표준
 
-## 정리
-
-| 용도 | 키워드 | 이유 |
-|------|--------|------|
-| 상수, Logger | `static final` | 인스턴스 무관, 불변, 관례 |
-| 멀티스레드에서 변하는 값 | `volatile` | CPU 캐시 무시, 최신 값 보장 |
-| 둘 다 필요할 때 | `static volatile` | 클래스 소속 + 최신 값 보장 |
-
-## 조합 예시
+## 조합별 예시와 판단 기준
 
 ```java
-// 1. static final - 절대 안 바뀌는 상수
+// 1. static final — 절대 안 바뀌는 상수
 private static final Logger log = LoggerFactory.getLogger(MyService.class);
 private static final int MAX_RETRY = 3;
 
-// 2. volatile - 싱글톤 Bean에서 변하는 공유 값
-private volatile String cachedToken;
-
-// 3. static volatile - 유틸 클래스에서 여러 스레드가 공유하는 플래그
-public class AppStatus {
-    private static volatile boolean initialized = false;
-
-    public static void init() {
-        // 무거운 초기화 작업
-        initialized = true;  // 모든 스레드가 즉시 true를 봄
+// 2. volatile — 멀티스레드에서 변하는 공유 값
+//    일반 클래스: 스레드 간 플래그
+public class Worker implements Runnable {
+    private volatile boolean running = true;
+    public void run() {
+        while (running) { doWork(); } // 다른 스레드가 stop() 호출하면 즉시 반영
     }
-
-    public static boolean isReady() {
-        return initialized;
-    }
+    public void stop() { running = false; }
 }
 
-// 4. static (non-volatile) - 스레드 안전이 필요 없는 유틸 상수
-public class DateUtil {
-    private static final DateTimeFormatter FORMATTER =
-        DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//    Spring 싱글톤 Bean: 인메모리 캐싱
+@Service
+public class DashboardService {
+    private static final long CACHE_TTL_MS = 60 * 60 * 1000L;
+    private volatile DashboardResponse cachedResponse;
+    private volatile long cacheTimestamp;
+}
+
+// 3. static volatile — 클래스 레벨 접근 + 멀티스레드 공유
+public class AppStatus {
+    private static volatile boolean initialized = false;
+    public static void init() {
+        initialized = true;  // 모든 스레드가 즉시 true를 봄
+    }
+    public static boolean isReady() { return initialized; }
 }
 ```
 
-**판단 기준:**
-- 값이 안 바뀜 → `static final`
-- 값이 바뀜 + 멀티스레드에서 공유 → `volatile`
-- 값이 바뀜 + 클래스 레벨 접근 필요 + 멀티스레드 → `static volatile`
+**핵심: `volatile`은 Spring Bean 전용이 아니라, 여러 스레드가 하나의 변수를 읽고 쓰는 모든 상황에서 필요하다.**
+
+| 판단 기준 | 키워드 |
+|-----------|--------|
+| 값이 안 바뀜 | `static final` |
+| 값이 바뀜 + 멀티스레드에서 공유 | `volatile` |
+| 값이 바뀜 + 클래스 레벨 접근 + 멀티스레드 | `static volatile` |
